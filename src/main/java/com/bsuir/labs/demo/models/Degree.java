@@ -1,14 +1,34 @@
 package com.bsuir.labs.demo.models;
 
-import com.bsuir.labs.demo.exceptions.IllegalArgumentsException;
+import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "degree_service")
+@Component
 public class Degree {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "degrees")
     private double degrees;
 
-    public Degree(double degrees) {
-        this.degrees = degrees;
+    @Column(name = "radians")
+    private double radians;
+
+    public Degree() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public double getDegrees() {
@@ -19,25 +39,17 @@ public class Degree {
         this.degrees = degrees;
     }
 
-    public static void validate(double degree) throws IllegalArgumentsException, RuntimeException {
-
-        if (degree > 360 || degree < -360) {
-            throw new IllegalArgumentsException("Illegal arguments");
-        }
-
+    public double getRadians() {
+        return radians;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Degree degree = (Degree) o;
-        return Double.compare(degree.degrees, degrees) == 0;
+    public void setRadians(double radians) {
+        this.radians = radians;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(degrees);
+    public String toString() {
+        return "degrees: " + degrees + ", radians: " + radians;
     }
+
 
 }

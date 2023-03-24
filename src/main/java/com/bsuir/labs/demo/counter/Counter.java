@@ -8,8 +8,8 @@ public class Counter {
         return COUNTER;
     }
 
-    public static int increment() {
-        return ++COUNTER;
+    synchronized public static void increment() {
+        ++COUNTER;
     }
 
 
