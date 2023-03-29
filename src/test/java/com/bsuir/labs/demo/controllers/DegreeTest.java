@@ -1,7 +1,8 @@
 package com.bsuir.labs.demo.controllers;
 
+import com.bsuir.labs.demo.calculations.DegreeCalculation;
 import com.bsuir.labs.demo.exceptions.IllegalArgumentsException;
-import com.bsuir.labs.demo.service.DegreeService;
+import com.bsuir.labs.demo.validation.DegreeValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -11,28 +12,28 @@ public class DegreeTest {
 
     @Test
     public void validationShouldThrowException() {
-        DegreeService degreeService = new DegreeService();
+        DegreeValidation degreeValidation = new DegreeValidation();
         Assertions.assertThrows(IllegalArgumentsException.class, () -> {
-            degreeService.validate(381);
+            degreeValidation.validate(381);
         });
     }
 
     @Test
-    public void resultOfCalculationShouldBeZero(){
-        DegreeService degreeService = new DegreeService();
-        Assertions.assertEquals(0,degreeService.calculate(0),EPS);
+    public void resultOfCalculationShouldBeZero() {
+        DegreeCalculation degreeCalculation = new DegreeCalculation();
+        Assertions.assertEquals(0, degreeCalculation.calculate(0), EPS);
     }
 
     @Test
-    public void resultOfRightBoundOfDegreeInterval(){
-        DegreeService degreeService = new DegreeService();
-        Assertions.assertEquals(6.28,degreeService.calculate(360),EPS);
+    public void resultOfRightBoundOfDegreeInterval() {
+        DegreeCalculation degreeCalculation = new DegreeCalculation();
+        Assertions.assertEquals(6.28, degreeCalculation.calculate(360), EPS);
     }
 
     @Test
     public void resultOfLeftBoundOfDegreeInterval() {
-        DegreeService degreeService = new DegreeService();
-        Assertions.assertEquals(0, degreeService.calculate(-360), EPS);
+        DegreeCalculation degreeCalculation = new DegreeCalculation();
+        Assertions.assertEquals(0, degreeCalculation.calculate(-360), EPS);
     }
 
 }

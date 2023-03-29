@@ -1,12 +1,14 @@
 package com.bsuir.labs.demo.controllers;
 
+import com.bsuir.labs.demo.async.DegreeAsync;
 import com.bsuir.labs.demo.cache.Cache;
+import com.bsuir.labs.demo.calculations.DegreeCalculation;
 import com.bsuir.labs.demo.counter.Counter;
 import com.bsuir.labs.demo.counter.CounterThread;
-import com.bsuir.labs.demo.dao.DegreeDAO;
 import com.bsuir.labs.demo.exceptions.IllegalArgumentsException;
 import com.bsuir.labs.demo.models.Degree;
 import com.bsuir.labs.demo.service.DegreeService;
+import com.bsuir.labs.demo.validation.DegreeValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,37 +24,44 @@ import java.util.stream.Collectors;
 public class DegreeToRadiansController {
 
     private final Cache<Double, Double> cache;
-    private final CounterThread counterThread;
     private final DegreeService degreeService;
-    private final Degree degrees;
-    private final DegreeDAO degreeDAO;
+    private final DegreeCalculation degreeCalculation;
+    private final DegreeValidation degreeValidation;
+    private final DegreeAsync degreeAsync;
+
 
     private static final Logger logger = LogManager.getLogger(DegreeToRadiansController.class);
 
     @Autowired
-    public DegreeToRadiansController(Cache<Double, Double> cache, CounterThread counterThread,
-                                     DegreeService degreeService, Degree degrees, DegreeDAO degreeDAO) {
+    public DegreeToRadiansController(Cache<Double, Double> cache,
+                                     DegreeService degreeService,
+                                     DegreeCalculation degreeCalculation,
+                                     DegreeValidation degreeValidation, DegreeAsync degreeAsync) {
+
         this.cache = cache;
-        this.counterThread = counterThread;
         this.degreeService = degreeService;
-        this.degrees = degrees;
-        this.degreeDAO = degreeDAO;
+        this.degreeCalculation = degreeCalculation;
+        this.degreeValidation = degreeValidation;
+        this.degreeAsync = degreeAsync;
     }
 
     @GetMapping("/degree")
-    public ResponseEntity<?> degreesToRadians(@RequestParam("degree") double degree) throws IllegalArgumentsException {
+    public ResponseEntity<?> degreesToRadians(@RequestParam("degree") double degree,
+                                              @ModelAttribute("degrees") Degree degrees)
+            throws IllegalArgumentsException {
 
+        CounterThread counterThread = new CounterThread();
+        counterThread.start();
 
-        counterThread.run();
         logger.info("GetMapping by address localhost:8080/degree?degree=...");
 
-        degreeService.validate(degree);
+        degreeValidation.validate(degree);
         logger.info("Degree validation (if degree>360||degree<-360) - Exception");
 
         double result;
         if (!cache.contain(degree)) {
             logger.info("calculate");
-            result = degreeService.calculate(degree);
+            result = degreeCalculation.calculate(degree);
             logger.info("Push to cache");
             cache.push(degree, result);
         } else {
@@ -62,7 +71,7 @@ public class DegreeToRadiansController {
 
         degrees.setDegrees(degree);
         degrees.setRadians(result);
-       // degreeDAO.save(degrees);
+        //degreeService.save(degrees);
 
         return new ResponseEntity<>("result " + Counter.getCounter() + ":" + result, HttpStatus.OK);
     }
@@ -71,17 +80,33 @@ public class DegreeToRadiansController {
     @PostMapping("/degree")
     public ResponseEntity<?> listOfDegreeToRadiansController(@RequestBody List<Double> listOfDegree) {
 
-        List<Double> responseList = listOfDegree.stream().map(degreeService::calculate).collect(Collectors.toList());
+        List<Double> responseList = listOfDegree.stream().map(degreeCalculation::calculate).collect(Collectors.toList());
 
-        double sum = degreeService.findSum(responseList);
-        double min = degreeService.findMin(responseList);
-        double max = degreeService.findMax(responseList);
-
+        double sum = degreeCalculation.findSum(responseList);
+        double min = degreeCalculation.findMin(responseList);
+        double max = degreeCalculation.findMax(responseList);
 
 
         return new ResponseEntity<>("Result: " + responseList + "\n" + "min: " + min + "\n"
                 + "max: " + max + "\nsum: " + sum, HttpStatus.OK);
     }
+
+    @PostMapping("/async")
+    public Integer method(@RequestBody Degree degree) throws IllegalArgumentsException {
+        degreeValidation.validate(degree.getDegrees());
+        int id = degreeAsync.createAsync(degree);
+
+        degreeAsync.computeAsync(id);
+        return id;
+    }
+
+    @GetMapping("/result/{id}")
+    public Degree result(@PathVariable("id") int id){
+        return degreeService.findOne(id);
+    }
+
+
+
 
 
 }

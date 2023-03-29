@@ -10,8 +10,8 @@ public class CounterThread extends Thread {
     }
 
     @Override
-    public void run() {
-            Counter.increment();
+    public void start() {
+        Counter.increment();
     }
 
 

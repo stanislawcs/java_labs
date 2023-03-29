@@ -1,12 +1,9 @@
 package com.bsuir.labs.demo.models;
 
-import org.springframework.stereotype.Component;
-
 import javax.persistence.*;
 
 @Entity
 @Table(name = "degree_service")
-@Component
 public class Degree {
 
     @Id

@@ -11,7 +11,8 @@ public class IllegalArgumentsException extends Exception {
 
     private static final Logger logger = LogManager.getLogger(DegreeToRadiansController.class);
 
-    public IllegalArgumentsException() {}
+    public IllegalArgumentsException() {
+    }
 
     public IllegalArgumentsException(String message) {
         super(message);

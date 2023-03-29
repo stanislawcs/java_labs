@@ -1,52 +1,34 @@
 package com.bsuir.labs.demo.service;
 
-import com.bsuir.labs.demo.exceptions.IllegalArgumentsException;
-import org.springframework.stereotype.Component;
+import com.bsuir.labs.demo.models.Degree;
+import com.bsuir.labs.demo.repositories.DegreeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
-@Component
+@Service
 public class DegreeService {
 
-    public void validate(double degree) throws IllegalArgumentsException {
+    private final DegreeRepository degreeRepository;
 
-        if (degree > 360 || degree < -360) {
-            throw new IllegalArgumentsException("Illegal arguments");
-        }
-
+    @Autowired
+    public DegreeService(DegreeRepository degreeRepository) {
+        this.degreeRepository = degreeRepository;
     }
 
-    public double calculate(double degree) {
-        if (degree < 0) {
-            degree += 360;
-        }
-        return degree / 57.3;
+    @Transactional
+    public void save(Degree degree) {
+        degreeRepository.save(degree);
     }
 
-    public double findSum(List<Double> listOfDegree) {
-        double sum = 0;
-        if (!listOfDegree.isEmpty())
-            sum = listOfDegree.stream().mapToDouble(Double::doubleValue).sum();
-        return sum;
+    @Transactional
+    public Degree findOne(int id){
+        Optional<Degree> foundDegree = degreeRepository.findById(id);
+        return foundDegree.orElse(null);
     }
 
-    public double findMin(List<Double> listOfDegree) {
-        double min = 0;
-
-        if (!listOfDegree.isEmpty()) {
-            min = listOfDegree.stream().min(Double::compareTo).get();
-        }
-        return min;
-    }
-
-    public double findMax(List<Double> listOfDegree) {
-        double max = 0;
-
-        if (!listOfDegree.isEmpty()) {
-            max = listOfDegree.stream().max(Double::compareTo).get();
-        }
-        return max;
-    }
 
 }
 
